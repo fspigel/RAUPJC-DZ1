@@ -2,6 +2,7 @@
 
 namespace dz1_zad3
 {
+    //testing VS2015 git integration
     class Program
     {
         static void Main(string[] args)
