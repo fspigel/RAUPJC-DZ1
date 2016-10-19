@@ -1,0 +1,6 @@
+c:\users\fspig\documents\visual studio 2015\Projects\dz1\dz1\bin\Debug\dz1.exe.config
+C:\Users\fspig\Documents\Visual Studio 2015\Projects\dz1\dz1\obj\Debug\dz1.csprojResolveAssemblyReference.cache
+C:\Users\fspig\Documents\Visual Studio 2015\Projects\dz1\dz1\bin\Debug\dz1.exe
+C:\Users\fspig\Documents\Visual Studio 2015\Projects\dz1\dz1\bin\Debug\dz1.pdb
+C:\Users\fspig\Documents\Visual Studio 2015\Projects\dz1\dz1\obj\Debug\dz1.exe
+C:\Users\fspig\Documents\Visual Studio 2015\Projects\dz1\dz1\obj\Debug\dz1.pdb
