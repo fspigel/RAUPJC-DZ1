@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
+using System.Linq;
 
 namespace Game1
 {
@@ -55,6 +56,8 @@ namespace Game1
         /// </ summary >
         private IGenericList<Sprite> SpritesForDrawList = new GenericList<Sprite>();
 
+        public GenericList<Wall> Walls { get; set; }
+        public GenericList<Wall> Goals { get; set; }
 
         /// <summary>
         /// Allows the game to perform any initialization it needs to before starting to run.
@@ -85,7 +88,21 @@ namespace Game1
             SpritesForDrawList.Add(PaddleBottom);
             SpritesForDrawList.Add(PaddleTop);
             SpritesForDrawList.Add(Ball);
-            base.Initialize();
+
+            Walls = new GenericList<Wall>()
+            {
+                // try with 100 for default wall size !
+                new Wall (-GameConstants.WallDefaultSize, 0, GameConstants.WallDefaultSize, screenBounds . Height ) ,
+                new Wall ( screenBounds . Right ,0 , GameConstants.WallDefaultSize, screenBounds.Height)
+            };
+
+            Goals = new GenericList<Wall>()
+            {
+                new Wall (0, screenBounds.Height, screenBounds.Width, GameConstants.WallDefaultSize),
+                new Wall (screenBounds.Top, -GameConstants.WallDefaultSize, screenBounds.Width, GameConstants.WallDefaultSize)
+            };
+
+                base.Initialize();
         }
         /// <summary>
         /// LoadContent will be called once per game and is the place to load
@@ -96,15 +113,15 @@ namespace Game1
             // Initialize new SpriteBatch object which will be used to draw textures .
             spriteBatch = new SpriteBatch(GraphicsDevice);
             // Set textures
-            Texture2D paddleTexture = Content.Load<Texture2D>(" paddle ");
+            Texture2D paddleTexture = Content.Load<Texture2D>("paddle");
             PaddleBottom.Texture = paddleTexture;
             PaddleTop.Texture = paddleTexture;
-            Ball.Texture = Content.Load<Texture2D>(" ball ");
-            Background.Texture = Content.Load<Texture2D>(" background ");
+            Ball.Texture = Content.Load<Texture2D>("ball");
+            Background.Texture = Content.Load<Texture2D>("background");
             // Load sounds
             // Start background music
-            HitSound = Content.Load<SoundEffect>(" hit");
-            Music = Content.Load<Song>(" music ");
+            HitSound = Content.Load<SoundEffect>("hit");
+            Music = Content.Load<Song>("music");
             MediaPlayer.IsRepeating = true;
             MediaPlayer.Play(Music);
         }
@@ -127,6 +144,59 @@ namespace Game1
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
+            var touchState = Keyboard.GetState();
+
+            //Bottom paddle controls
+            if (touchState.IsKeyDown(Keys.Left))
+            {
+                PaddleBottom.X = PaddleBottom.X - (float)(PaddleBottom.Speed * gameTime.ElapsedGameTime.TotalMilliseconds);
+            }
+            if (touchState.IsKeyDown(Keys.Right))
+            {
+                PaddleBottom.X = PaddleBottom.X + (float)(PaddleBottom.Speed * gameTime.ElapsedGameTime.TotalMilliseconds);
+            }
+
+            //Top paddle controls
+            if (touchState.IsKeyDown(Keys.A)) 
+            {
+                PaddleTop.X = PaddleTop.X - (float)(PaddleTop.Speed * gameTime.ElapsedGameTime.TotalMilliseconds);
+            }
+            if (touchState.IsKeyDown(Keys.D))
+            {
+                PaddleTop.X = PaddleTop.X + (float)(PaddleTop.Speed * gameTime.ElapsedGameTime.TotalMilliseconds);
+            }
+
+            var bounds = GraphicsDevice.Viewport.Bounds;
+
+            PaddleBottom.X = MathHelper.Clamp(PaddleBottom.X, bounds.Left, bounds.Right - PaddleBottom.Width);
+            //Ball movement logic
+            var ballPositionChange = Ball.Direction * (float)(gameTime.ElapsedGameTime.TotalMilliseconds * Ball.Speed);
+            Ball.X += ballPositionChange.X;
+            Ball.Y += ballPositionChange.Y;
+
+
+
+            // Ball - side walls
+            if (Walls.Any(w => CollisionDetector.Overlaps(Ball, w)))
+            {
+                Ball.Direction = new Vector2(-Ball.Direction.X, Ball.Direction.Y);
+                Ball.Speed = Ball.Speed * Ball.BumpSpeedIncreaseFactor;
+            }
+            // Ball - winning walls
+            if (Goals.Any(w => CollisionDetector.Overlaps(Ball, w)))
+            {
+                Ball.X = bounds.Center.ToVector2().X;
+                Ball.Y = bounds.Center.ToVector2().Y;
+                Ball.Speed = GameConstants.DefaultInitialBallSpeed;
+                HitSound.Play();
+            }
+            // Paddle - ball collision
+            if (CollisionDetector.Overlaps(Ball, PaddleTop) && Ball.Direction.Y < 0
+            || (CollisionDetector.Overlaps(Ball, PaddleBottom) && Ball.Direction.Y > 0))
+            {
+                Ball.Direction = new Vector2(Ball.Direction.X, -Ball.Direction.Y);
+                Ball.Speed *= Ball.BumpSpeedIncreaseFactor;
+            }
 
             // TODO: Add your update logic here
 

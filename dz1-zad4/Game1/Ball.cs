@@ -25,8 +25,7 @@ namespace Game1
         /// OPTIONAL TODO : create your own , more suitable type
         /// </ summary >
         public Vector2 Direction { get; set; }
-        public Ball(int size, float speed, float
-        defaultBallBumpSpeedIncreaseFactor) : base(size, size)
+        public Ball(int size, float speed, float defaultBallBumpSpeedIncreaseFactor) : base(size, size)
         {
             Speed = speed;
             BumpSpeedIncreaseFactor = defaultBallBumpSpeedIncreaseFactor;
