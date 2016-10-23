@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace dz1_zad3
 {
-    class GenericList<X> : IGenericList<X>
+    public class GenericList<X> : IGenericList<X>
     {
         private X[] _internalStorage;
 
